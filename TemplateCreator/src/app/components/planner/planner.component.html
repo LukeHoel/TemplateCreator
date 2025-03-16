@@ -17,8 +17,34 @@
     </button>
     
     <div class="days-container" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">
-        <div class="day-item" *ngFor="let item of selectedMesoCycle.microcycles[0].days" cdkDrag>
-            <input matInput [(ngModel)]="item.name">
+        <div *ngFor="let item of selectedMesoCycle.microcycles[0].days" cdkDrag>
+            <mat-card class="day-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <input matInput [(ngModel)]="item.name" placeholder="Day Name">
+                    </mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="exercises-container" cdkDropList (cdkDropListDropped)="dropExercise($event)">
+                        <mat-card *ngFor="let exercise of item.exercises; let i = index" cdkDrag class="exercise-card">
+                            <mat-card-content>
+                                <div class="exercise-content">
+                                    <input matInput [(ngModel)]="exercise.name" placeholder="Exercise Name">
+                                    <button mat-icon-button color="warn" (click)="removeExercise(item, i)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                        <button mat-raised-button color="primary" (click)="addExercise(item)">
+                            <mat-icon>add</mat-icon>
+                            Add Exercise
+                        </button>
+                    </div>
+                </mat-card-content>
+                
+            </mat-card>
         </div>
     </div>
 </div>

@@ -4,6 +4,7 @@ import { Mesocycle } from '../../models/mesocycle';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { imports } from '../../app.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -11,7 +12,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: [...imports, DragDropModule],
+  imports: [...imports, DragDropModule, MatCardModule],
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss',
 })
@@ -72,5 +73,22 @@ export class PlannerComponent implements OnInit {
 
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.selectedMesoCycle.microcycles[0].days, event.previousIndex, event.currentIndex);
+  }
+
+  dropExercise(event: CdkDragDrop<string[]>) {
+    moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+  }
+
+  addExercise(day: any) {
+    if (!day.exercises) {
+      day.exercises = [];
+    }
+    day.exercises.push({
+      name: `Exercise ${day.exercises.length + 1}`
+    });
+  }
+
+  removeExercise(day: any, exerciseIndex: number) {
+    day.exercises.splice(exerciseIndex, 1);
   }
 }

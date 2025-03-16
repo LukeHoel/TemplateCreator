@@ -9,21 +9,56 @@
     padding: 8px;
   }
 
-  .day-item {
-    background: #f5f5f5;
-    border-radius: 8px;
-    padding: 16px 24px;
-    min-width: 120px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: box-shadow 0.2s;
+  .day-card {
+    min-width: 250px;
+    margin: 8px;
+    cursor: move;
 
-    &:hover {
-    transition: transform 0.2s, box-shadow 0.2s;
+    mat-card-header {
+      margin-bottom: 16px;
+      padding: 0 16px;
+    }
 
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    mat-card-content {
+      padding: 0 16px 16px;
+    }
+
+    .exercises-container {
+      min-height: 100px;
+      padding: 8px;
+      background: #fafafa;
+      border-radius: 4px;
+    }
+
+    .exercise-card {
+      margin-bottom: 8px;
+      background: #e3f2fd;
+      cursor: move;
+
+      mat-card-content {
+        padding: 8px;
+      }
+
+      .exercise-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-size: 14px;
+        color: #1976d2;
+
+        &:focus {
+          outline: none;
+          background: rgba(255, 255, 255, 0.5);
+          border-radius: 2px;
+        }
+      }
     }
   }
 }
@@ -36,5 +71,13 @@
 }
 
 .cdk-drag-preview {
-  display: none;  
+  display: none;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
