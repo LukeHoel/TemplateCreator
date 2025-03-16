@@ -19,7 +19,7 @@ import { Progression } from '../../models/progression';
   styleUrl: './planner.component.scss',
 })
 export class PlannerComponent implements OnInit {
-  progressionTypes = ['none', 'percent', 'increment', 'increment reps'];
+  progressionTypes = ['Add Percentage Amount', 'Add Amount', 'Add Reps', 'None'];
   units = ['lbs', 'km', 'minutes'];
   
   sampleMesoCycle = {

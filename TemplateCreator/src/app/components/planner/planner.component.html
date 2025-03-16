@@ -1,9 +1,9 @@
 <div class="planner-container">
     <div class="header-container">
-        <mat-form-field>
-            <mat-label>Mesocycle Name</mat-label>
-            <input matInput [(ngModel)]="selectedMesoCycle.name">
-        </mat-form-field>
+        <div class="input-container">
+            <label>Mesocycle Name</label>
+            <input [(ngModel)]="selectedMesoCycle.name">
+        </div>
 
         <button mat-raised-button color="primary" (click)="saveMesocycle()">
             <mat-icon>save</mat-icon>
@@ -16,7 +16,7 @@
             <mat-card class="day-card">
                 <mat-card-header>
                     <mat-card-title>
-                        <input matInput [(ngModel)]="item.name" placeholder="Day Name">
+                        <input [(ngModel)]="item.name" placeholder="Day Name">
                     </mat-card-title>
                     <button mat-icon-button color="warn" (click)="removeDay(i)">
                         <mat-icon>delete</mat-icon>
@@ -28,24 +28,21 @@
                         <mat-card *ngFor="let exercise of item.exercises; let i = index" cdkDrag class="exercise-card">
                             <mat-card-content>
                                 <div class="exercise-content">
-                                    <input matInput [(ngModel)]="exercise.name" placeholder="Exercise Name">
-                                    <mat-form-field>
-                                        <mat-label>Progression</mat-label>
-                                        <mat-select [(ngModel)]="exercise.progression.type">
-                                            <mat-option *ngFor="let type of progressionTypes" [value]="type">
-                                                {{type}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                    <mat-form-field>
-                                        <mat-label>Unit</mat-label>
-                                        <mat-select [(ngModel)]="exercise.progression.unit">
-                                            <mat-option *ngFor="let unit of units" [value]="unit">
-                                                {{unit}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                    <button mat-icon-button color="warn" (click)="removeExercise(item, i)">
+                                    <input [(ngModel)]="exercise.name" placeholder="Exercise Name">
+                                    <select [(ngModel)]="exercise.progression.type">
+                                        <option *ngFor="let type of progressionTypes" [value]="type">
+                                            {{type}}
+                                        </option>
+                                    </select>
+                                    <input *ngIf="exercise.progression.type !== 'None'" 
+                                        type="number" 
+                                        [(ngModel)]="exercise.progression.amount">
+                                    <select [(ngModel)]="exercise.progression.unit">
+                                        <option *ngFor="let unit of units" [value]="unit">
+                                            {{unit}}
+                                        </option>
+                                    </select>
+                                    <button mat-icon-button color="warn" (click)="removeExercise(item, i)" class="delete-button">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
@@ -57,7 +54,6 @@
                         </button>
                     </div>
                 </mat-card-content>
-                
             </mat-card>
         </div>
 
