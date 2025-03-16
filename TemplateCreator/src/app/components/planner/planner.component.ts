@@ -5,11 +5,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { imports } from '../../app.module';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: imports,
+  imports: [...imports, DragDropModule],
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss',
 })
@@ -66,5 +68,9 @@ export class PlannerComponent implements OnInit {
     
     localStorage.setItem(this.selectedMesoCycle.name, JSON.stringify(this.selectedMesoCycle));
     localStorage.setItem('lastMesocycleName', this.selectedMesoCycle.name);
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.selectedMesoCycle.microcycles[0].days, event.previousIndex, event.currentIndex);
   }
 }

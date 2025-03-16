@@ -1,23 +1,24 @@
 <div class="planner-container">
-  <div class="header-container">
-    <mat-form-field>
-      <mat-label>Mesocycle Name</mat-label>
-      <input matInput [(ngModel)]="selectedMesoCycle.name">
-    </mat-form-field>
-    
-    <button mat-raised-button color="primary" (click)="saveMesocycle()">
-      <mat-icon>save</mat-icon>
-      Save
-    </button>
-  </div>
+    <div class="header-container">
+        <mat-form-field>
+            <mat-label>Mesocycle Name</mat-label>
+            <input matInput [(ngModel)]="selectedMesoCycle.name">
+        </mat-form-field>
 
-  <div class="days-container">
-    <div class="day-item" *ngFor="let item of selectedMesoCycle.microcycles[0].days">
-      {{ item.name }}
+        <button mat-raised-button color="primary" (click)="saveMesocycle()">
+            <mat-icon>save</mat-icon>
+            Save
+        </button>
     </div>
+
     <button mat-raised-button color="primary" (click)="addDay()">
         <mat-icon>add</mat-icon>
         Add Day
-      </button>
-  </div>
+    </button>
+    
+    <div class="days-container" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">
+        <div class="day-item" *ngFor="let item of selectedMesoCycle.microcycles[0].days" cdkDrag>
+            <input matInput [(ngModel)]="item.name">
+        </div>
+    </div>
 </div>
