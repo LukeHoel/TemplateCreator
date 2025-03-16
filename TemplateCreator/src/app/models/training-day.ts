@@ -1,6 +1,6 @@
 import { Exercise } from "./training-exercise";
 
 export interface Day {
-    day: string;
+    name: string;
     exercises: Array<Exercise>;
 }
