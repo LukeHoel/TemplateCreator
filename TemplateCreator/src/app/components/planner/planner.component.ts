@@ -5,18 +5,23 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
 import { imports } from '../../app.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { Progression } from '../../models/progression';
 
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: [...imports, DragDropModule, MatCardModule],
+  imports: [...imports, DragDropModule, MatCardModule, MatSelectModule],
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss',
 })
 export class PlannerComponent implements OnInit {
+  progressionTypes = ['none', 'percent', 'increment', 'increment reps'];
+  units = ['lbs', 'km', 'minutes'];
+  
   sampleMesoCycle = {
     name: 'Mesocycle',
     microcycles: [
@@ -84,11 +89,20 @@ export class PlannerComponent implements OnInit {
       day.exercises = [];
     }
     day.exercises.push({
-      name: `Exercise ${day.exercises.length + 1}`
+      name: `Exercise ${day.exercises.length + 1}`,
+      progression: {
+        type: 'none',
+        unit: 'lbs',
+        amount: 0
+      }
     });
   }
 
   removeExercise(day: any, exerciseIndex: number) {
     day.exercises.splice(exerciseIndex, 1);
+  }
+
+  removeDay(dayIndex: number) {
+    this.selectedMesoCycle.microcycles[0].days.splice(dayIndex, 1);
   }
 }

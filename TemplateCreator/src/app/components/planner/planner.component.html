@@ -10,19 +10,17 @@
             Save
         </button>
     </div>
-
-    <button mat-raised-button color="primary" (click)="addDay()">
-        <mat-icon>add</mat-icon>
-        Add Day
-    </button>
     
     <div class="days-container" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">
-        <div *ngFor="let item of selectedMesoCycle.microcycles[0].days" cdkDrag>
+        <div *ngFor="let item of selectedMesoCycle.microcycles[0].days; let i = index" cdkDrag>
             <mat-card class="day-card">
                 <mat-card-header>
                     <mat-card-title>
                         <input matInput [(ngModel)]="item.name" placeholder="Day Name">
                     </mat-card-title>
+                    <button mat-icon-button color="warn" (click)="removeDay(i)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
                 </mat-card-header>
 
                 <mat-card-content>
@@ -31,6 +29,22 @@
                             <mat-card-content>
                                 <div class="exercise-content">
                                     <input matInput [(ngModel)]="exercise.name" placeholder="Exercise Name">
+                                    <mat-form-field>
+                                        <mat-label>Progression</mat-label>
+                                        <mat-select [(ngModel)]="exercise.progression.type">
+                                            <mat-option *ngFor="let type of progressionTypes" [value]="type">
+                                                {{type}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <mat-form-field>
+                                        <mat-label>Unit</mat-label>
+                                        <mat-select [(ngModel)]="exercise.progression.unit">
+                                            <mat-option *ngFor="let unit of units" [value]="unit">
+                                                {{unit}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
                                     <button mat-icon-button color="warn" (click)="removeExercise(item, i)">
                                         <mat-icon>delete</mat-icon>
                                     </button>
@@ -46,5 +60,10 @@
                 
             </mat-card>
         </div>
+
+        <button mat-raised-button color="primary" (click)="addDay()">
+            <mat-icon>add</mat-icon>
+            Add Day
+        </button>
     </div>
 </div>
