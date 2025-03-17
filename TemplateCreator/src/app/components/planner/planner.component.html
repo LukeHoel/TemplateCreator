@@ -52,10 +52,12 @@
 
                 <mat-card-content>
                     <div class="exercises-container" cdkDropList (cdkDropListDropped)="dropExercise($event)">
-                        <mat-card *ngFor="let exercise of item.exercises; let i = index" cdkDrag class="exercise-card">
+                        <mat-card *ngFor="let exercise of item.exercises; let o = index" cdkDrag class="exercise-card">
                             <mat-card-content>
                                 <div class="exercise-content">
-                                    <input [(ngModel)]="exercise.name" placeholder="Exercise Name">
+                                    <input [id]="'exercise-name-' + o + '-' + i" 
+                                           [(ngModel)]="exercise.name" 
+                                           placeholder="Exercise Name">
                                     <select [(ngModel)]="exercise.progression.type">
                                         <option *ngFor="let type of progressionTypes" [value]="type">
                                             {{type}}
@@ -70,7 +72,7 @@
                                         </option>
                                     </select>
                                 </div>
-                                <button mat-icon-button color="warn" (click)="removeExercise(item, i)" class="delete-button">
+                                <button mat-icon-button color="warn" (click)="removeExercise(item, o)" class="delete-button">
                                     <mat-icon>delete</mat-icon>
                                 </button>
                             </mat-card-content>

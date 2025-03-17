@@ -99,14 +99,27 @@ export class PlannerComponent implements OnInit {
     if (!day.exercises) {
       day.exercises = [];
     }
+    const newIndex = day.exercises.length;
     day.exercises.push({
-      name: `Exercise ${day.exercises.length + 1}`,
+      name: `Exercise ${newIndex + 1}`,
       progression: {
         type: 'Add Weight',
         amount: 5
       },
       color: "#ff0000",
       setCount: 3
+    });
+
+    // Get the day index to construct the correct input ID
+    const dayIndex = this.selectedMesoCycle.microcycles[0].days.findIndex(d => d === day);
+    
+    // Allow time for the DOM to update
+    setTimeout(() => {
+      const exerciseInput = document.querySelector(`#exercise-name-${newIndex}-${dayIndex}`) as HTMLInputElement;
+      if (exerciseInput) {
+        exerciseInput.focus();
+        exerciseInput.select();
+      }
     });
   }
 
