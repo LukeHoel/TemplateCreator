@@ -48,8 +48,8 @@ export class SpreadsheetGenerationService {
             for (let dayIndex = 0; dayIndex < microcycle.days.indexOf(day); dayIndex++) {
               row.push('', '', '', '');
             }
-            // Add exercise data
-            row.push(exercise.name, '', '', '');
+            // Add exercise data - only include name in first set
+            row.push(setIndex === 0 ? exercise.name : ' ', '', '', '');
             // Add empty cells for remaining days
             for (let dayIndex = microcycle.days.indexOf(day) + 1; dayIndex < microcycle.days.length; dayIndex++) {
               row.push('', '', '', '');
