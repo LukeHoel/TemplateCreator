@@ -59,8 +59,7 @@
                     <div class="exercises-container" cdkDropList (cdkDropListDropped)="dropExercise($event, item)">
                         <mat-card *ngFor="let exercise of item.exercises; let o = index" 
                                  cdkDrag 
-                                 class="exercise-card"
-                                 [ngStyle]="{'border-left': '4px solid ' + exercise.color}">
+                                 class="exercise-card">
                             <mat-card-content>
                                 <div class="exercise-content">
                                     <input [id]="'exercise-name-' + o + '-' + i" 
@@ -79,6 +78,12 @@
                                             {{count}} {{count === 1 ? 'Set' : 'Sets'}}
                                         </option>
                                     </select>
+                                    <div class="color-picker-container">
+                                        <label>Color:</label>
+                                        <input type="color" 
+                                               [(ngModel)]="exercise.color" 
+                                               [style.background-color]="exercise.color">
+                                    </div>
                                 </div>
                                 <button mat-icon-button color="warn" (click)="removeExercise(item, o)" class="delete-button" tabindex="-1">
                                     <mat-icon>delete</mat-icon>
