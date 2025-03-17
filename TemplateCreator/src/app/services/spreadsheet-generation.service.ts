@@ -52,7 +52,7 @@ export class SpreadsheetGenerationService {
                   if (previousSheetName) {
                     // Exercise name
                     const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
-                    const formula = `'${previousSheetName}'!${prevSheetCell}`;
+                    const formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
                     ws[cellRef] = { t: 'n', f: formula };
                   }
                   break;
@@ -64,15 +64,15 @@ export class SpreadsheetGenerationService {
                     switch(exercise.progression.type) {
                     case 'Add Weight':
                         const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
-                        formula = `'${previousSheetName}'!${prevSheetCell}${add}`;
+                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}${add})`;
                         break;
                       case 'Add Percentage':
                         // Increase previous reps by specified percentage
                         const percentageMultiplier = 1 + (exercise.progression.amount / 100);
-                        formula = `ROUND('${previousSheetName}'!${prevSheetCell}*${percentageMultiplier},0)`;
+                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",ROUND('${previousSheetName}'!${prevSheetCell}*${percentageMultiplier},0))`;
                         break;
                       default:
-                        formula = `'${previousSheetName}'!${prevSheetCell}`;
+                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
                         break;
                    }
                     
@@ -90,17 +90,16 @@ export class SpreadsheetGenerationService {
                     switch(exercise.progression.type) {
                       case 'Add Reps':
                         // Increase previous reps by specified amount
-                        formula = `'${previousSheetName}'!${prevSheetCell}+${exercise.progression.amount}`;
+                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}+${exercise.progression.amount})`;
                         break;
                       case 'Add Percentage':
                       case 'Add Weight':
                       case 'None':
                       default:
                         // Keep same reps
-                        formula = `'${previousSheetName}'!${prevSheetCell}`;
+                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
                         break;
                     }
-
 
                     ws[cellRef] = { t: 'n', f: formula };
                   }
