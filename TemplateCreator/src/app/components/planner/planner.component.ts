@@ -12,6 +12,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Progression, ProgressionType } from '../../models/progression';
 import { SpreadsheetGenerationService } from '../../services/spreadsheet-generation.service';
 import { Day } from '../../models/training-day';
+import { sampleMeso } from '../../models/sample-meso';
 
 @Component({
   selector: 'app-planner',
@@ -23,20 +24,6 @@ import { Day } from '../../models/training-day';
 export class PlannerComponent implements OnInit {
   progressionTypes: ProgressionType[] = ['Add Weight', 'Add Reps', 'Add Percentage', 'None'];
   
-  sampleMesoCycle = {
-    name: 'Mesocycle',
-    microcycles: [
-      {
-        name: 'Week 1',
-        days: [
-          {
-            name: 'Day 1',
-            exercises: [],
-          },
-        ],
-      },
-    ],
-  };
   selectedMesoCycle: Mesocycle;
 
   constructor(private spreadsheetService: SpreadsheetGenerationService) {
@@ -46,9 +33,9 @@ export class PlannerComponent implements OnInit {
       const savedMesocycle = localStorage.getItem(lastMesocycleName);
       this.selectedMesoCycle = savedMesocycle 
         ? JSON.parse(savedMesocycle) 
-        : {...this.sampleMesoCycle};
+        : {...sampleMeso};
     } else {
-      this.selectedMesoCycle = {...this.sampleMesoCycle};
+      this.selectedMesoCycle = {...sampleMeso};
     }
   }
 
