@@ -68,6 +68,36 @@ export class SpreadsheetGenerationService {
       });
     }
 
-    return rows;
+    // Reorganize rows to align exercises for each day
+    const reorganizedRows: any[][] = [headerRow];
+    const daysCount = microcycle.days.length;
+    const columnsPerDay = 4;
+    
+    // For each day
+    for (let dayIndex = 0; dayIndex < daysCount; dayIndex++) {
+      // Get all rows for this day (every 4th column starting at dayIndex * 4)
+      const dayRows = rows.slice(1).map(row => {
+        const dayData = row.slice(dayIndex * columnsPerDay, (dayIndex + 1) * columnsPerDay);
+        return dayData;
+      });
+      
+      // Remove empty rows
+      const nonEmptyRows = dayRows.filter(row => row.some(cell => cell !== ''));
+      
+      // Add non-empty rows to the reorganized rows
+      nonEmptyRows.forEach(row => {
+        // If we need more rows in reorganizedRows, add them
+        while (reorganizedRows.length <= nonEmptyRows.indexOf(row) + 1) {
+          reorganizedRows.push(new Array(daysCount * columnsPerDay).fill(''));
+        }
+        
+        // Add the row data at the correct position
+        for (let colIndex = 0; colIndex < columnsPerDay; colIndex++) {
+          reorganizedRows[nonEmptyRows.indexOf(row) + 1][dayIndex * columnsPerDay + colIndex] = row[colIndex];
+        }
+      });
+    }
+
+    return reorganizedRows;
   }
 } 
