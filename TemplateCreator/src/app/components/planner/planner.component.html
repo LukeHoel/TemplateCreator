@@ -14,6 +14,23 @@
             <mat-icon>download</mat-icon>
             Download Spreadsheet
         </button>
+
+        <button mat-raised-button color="primary" (click)="exportTemplate()">
+            <mat-icon>download</mat-icon>
+            Export Template
+        </button>
+
+        <input
+            type="file"
+            #fileInput
+            style="display: none"
+            accept=".json"
+            (change)="importTemplate($event)"
+        >
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+            <mat-icon>upload</mat-icon>
+            Import Template
+        </button>
     </div>
     
     <div class="days-container" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">

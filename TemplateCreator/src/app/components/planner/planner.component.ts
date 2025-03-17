@@ -111,4 +111,34 @@ export class PlannerComponent implements OnInit {
       this.spreadsheetService.generateAndDownloadSpreadsheet(this.selectedMesoCycle);
     }
   }
+
+  exportTemplate() {
+    if (!this.selectedMesoCycle) return;
+    
+    const dataStr = JSON.stringify(this.selectedMesoCycle, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.selectedMesoCycle.name}.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  importTemplate(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedMesocycle = JSON.parse(e.target?.result as string);
+        this.selectMesoCycle(importedMesocycle);
+      } catch (error) {
+        console.error('Error importing template:', error);
+        // You might want to add proper error handling/user notification here
+      }
+    };
+    reader.readAsText(file);
+  }
 }
