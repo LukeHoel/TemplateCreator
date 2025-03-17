@@ -146,4 +146,27 @@ export class PlannerComponent implements OnInit {
     };
     reader.readAsText(file);
   }
+
+  onNameChange(newName: string) {
+    // Check if a mesocycle with this name exists in localStorage
+    const savedMesocycle = localStorage.getItem(newName);
+    if (savedMesocycle) {
+      // If it exists, load it
+      this.selectedMesoCycle = JSON.parse(savedMesocycle);
+    }
+    // If it doesn't exist, keep the current mesocycle with the new name
+    // It will be saved when the user clicks save
+  }
+
+  loadMesocycle() {
+    if (!this.selectedMesoCycle?.name) return;
+    
+    const savedMesocycle = localStorage.getItem(this.selectedMesoCycle.name);
+    if (savedMesocycle) {
+      this.selectedMesoCycle = JSON.parse(savedMesocycle);
+    } else {
+      // Optionally add error handling for when the mesocycle doesn't exist
+      console.log('No mesocycle found with that name');
+    }
+  }
 }
