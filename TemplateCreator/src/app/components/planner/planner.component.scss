@@ -161,3 +161,11 @@
 .cdk-drag-animating {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.paddedSelect {
+  padding: 10px;
+  border-radius: 20px;
+  color: rgb(0, 92, 187);
+  font-weight: bold;
+  letter-spacing: 0.096px;
+}

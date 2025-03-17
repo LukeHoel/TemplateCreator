@@ -26,7 +26,7 @@ export class PlannerComponent implements OnInit {
   progressionTypes: ProgressionType[] = ['Add Weight', 'Add Reps', 'Add Percentage', 'None'];
   
   selectedMesoCycle: Mesocycle;
-  
+  microcycleCount: number = 3;
   // Add array of nice looking colors
   private exerciseColors: string[] = [
     '#386DDE', // "Chest",
@@ -158,7 +158,11 @@ export class PlannerComponent implements OnInit {
   generateSpreadsheet() {
     if (this.selectedMesoCycle) {
       const week = this.selectedMesoCycle.microcycles[0];
-      this.spreadsheetService.generateAndDownloadSpreadsheet({...this.selectedMesoCycle, microcycles: [week,week]});
+      const weeks = [];
+      for (let i = 0; i < this.microcycleCount; i++) {
+        weeks.push(week);
+      }
+      this.spreadsheetService.generateAndDownloadSpreadsheet({...this.selectedMesoCycle, microcycles: weeks});
     }
   }
 
@@ -218,26 +222,5 @@ export class PlannerComponent implements OnInit {
       // Optionally add error handling for when the mesocycle doesn't exist
       console.log('No mesocycle found with that name');
     }
-  }
-
-  randomizeExerciseColors() {
-    if (!this.selectedMesoCycle) return;
-    
-    this.selectedMesoCycle.microcycles[0].days.forEach(day => {
-      // Reset colors for each day
-      const exerciseCount = day.exercises.length;
-      
-      // Shuffle the full color array for this day
-      const shuffledColors = [...this.exerciseColors]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, exerciseCount);
-      
-      // Assign colors to exercises
-      day.exercises.forEach((exercise, index) => {
-        exercise.color = shuffledColors[index] || this.exerciseColors[index % this.exerciseColors.length];
-      });
-    });
-    
-    this.saveMesocycle();
   }
 }

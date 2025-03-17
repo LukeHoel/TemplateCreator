@@ -15,10 +15,11 @@
             Load
         </button>
 
-        <button mat-raised-button color="accent" (click)="randomizeExerciseColors()">
-            <mat-icon>palette</mat-icon>
-            Randomize Colors
-        </button>
+        <select [(ngModel)]="microcycleCount" class="paddedSelect ">
+            <option *ngFor="let count of [3, 4, 5, 6, 7]" [value]="count">
+                {{count}} Weeks Long
+            </option>
+        </select>
 
         <button mat-raised-button color="accent" (click)="generateSpreadsheet()">
             <mat-icon>download</mat-icon>
