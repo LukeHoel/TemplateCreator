@@ -29,16 +29,18 @@ export class PlannerComponent implements OnInit {
   
   // Add array of nice looking colors
   private exerciseColors: string[] = [
-    '#FF6B6B', // coral red
-    '#4ECDC4', // turquoise
-    '#45B7D1', // sky blue
-    '#96CEB4', // sage green
-    '#FFEEAD', // cream yellow
-    '#D4A5A5', // dusty rose
-    '#9B89B3', // lavender
-    '#E9967A', // salmon
-    '#66CDAA', // medium aquamarine
-    '#F4A460'  // sandy brown
+    '#386DDE', // "Chest",
+    '#F05D23', // "Back",
+    '#48e5c2', // "Triceps",
+    '#C42847', // "Biceps",
+    '#6AB547', // "Shoulders",
+    '#a6245f', // "Quads",
+    '#ff69b4', // "Glutes",
+    '#8cc9d3', // "Hamstrings",
+    '#8E4A49', // "Calves",
+    '#297373', // "Traps",
+    '#F9C846', // "Forearms",
+    '#297373', // "Abs"
   ];
 
   constructor(private spreadsheetService: SpreadsheetGenerationService) {
@@ -97,14 +99,30 @@ export class PlannerComponent implements OnInit {
     moveItemInArray(exercise.exercises, event.previousIndex, event.currentIndex);
   }
 
+  private getAvailableColors(day: Day): string[] {
+    // Get currently used colors in this day
+    const usedColors = new Set(day.exercises.map(ex => ex.color));
+    // Return only unused colors
+    return this.exerciseColors.filter(color => !usedColors.has(color));
+  }
+
+  private getRandomColor(availableColors: string[]): string {
+    if (availableColors.length === 0) {
+      // If no unique colors left, fall back to the full color array
+      return this.exerciseColors[Math.floor(Math.random() * this.exerciseColors.length)];
+    }
+    return availableColors[Math.floor(Math.random() * availableColors.length)];
+  }
+
   addExercise(day: Day) {
     if (!day.exercises) {
       day.exercises = [];
     }
     const newIndex = day.exercises.length;
     
-    // Get random color from the array
-    const randomColor = this.exerciseColors[Math.floor(Math.random() * this.exerciseColors.length)];
+    // Get available colors and pick a random one
+    const availableColors = this.getAvailableColors(day);
+    const randomColor = this.getRandomColor(availableColors);
     
     day.exercises.push({
       name: `Exercise ${newIndex + 1}`,
@@ -200,5 +218,26 @@ export class PlannerComponent implements OnInit {
       // Optionally add error handling for when the mesocycle doesn't exist
       console.log('No mesocycle found with that name');
     }
+  }
+
+  randomizeExerciseColors() {
+    if (!this.selectedMesoCycle) return;
+    
+    this.selectedMesoCycle.microcycles[0].days.forEach(day => {
+      // Reset colors for each day
+      const exerciseCount = day.exercises.length;
+      
+      // Shuffle the full color array for this day
+      const shuffledColors = [...this.exerciseColors]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, exerciseCount);
+      
+      // Assign colors to exercises
+      day.exercises.forEach((exercise, index) => {
+        exercise.color = shuffledColors[index] || this.exerciseColors[index % this.exerciseColors.length];
+      });
+    });
+    
+    this.saveMesocycle();
   }
 }

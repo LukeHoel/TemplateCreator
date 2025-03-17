@@ -114,11 +114,13 @@ export class SpreadsheetGenerationService {
                 
                 // Set the cell fill color
                 if (!ws[cellRef].s) ws[cellRef].s = {};
+                const color = { rgb: '000000', style: 'thin' };
                 ws[cellRef].s = {
                   ...ws[cellRef].s,
                   fill: {
                     fgColor: { rgb: exercise.color.replace('#', '') },
-                  }
+                  },
+                  border: { top: color, bottom: color, left: color, right: color },
                 };
               }
             }
@@ -131,7 +133,7 @@ export class SpreadsheetGenerationService {
     });
 
     // Generate the Excel file
-    XLSX.writeFile(wb, `${mesocycle.name}_training_plan.xlsx`);
+    XLSX.writeFile(wb, `${mesocycle.name}.xlsx`);
   }
 
   private convertMicrocycleToWorksheetData(microcycle: Microcycle): any[][] {
