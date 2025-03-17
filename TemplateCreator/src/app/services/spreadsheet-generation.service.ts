@@ -36,58 +36,69 @@ export class SpreadsheetGenerationService {
             const dayIndex = Math.floor(colIndex / 4);
             const exerciseIndex = rowIndex - 2;
             const day = microcycle.days[dayIndex];
-            const exercises = [];
+            const exercises: any[] = [];
             day.exercises.forEach(exercise => {
               for (let setIndex = 0; setIndex < exercise.setCount; setIndex++) {
                 exercises.push(exercise);
               }
             });
-            const exercise = day.exercises[exerciseIndex];
+            const exercise = exercises[exerciseIndex];
+            console.error(exercise, rowIndex, colIndex);    
             if (exercise) {
               const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+              let prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
 
               switch (colIndex % 4) {
                 case 0:
-                  // Exercise name
+                  if (previousSheetName) {
+                    // Exercise name
+                    const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+                    const formula = `'${previousSheetName}'!${prevSheetCell}`;
+                    ws[cellRef] = { t: 'n', f: formula };
+                  }
                   break;
                 case 1:
                   // Weight
                   if (previousSheetName) {
-                    const prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
-                    const formula = `'${previousSheetName}'!${prevSheetRepsCell}`;
+                    const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+                    let formula;
+                    switch(exercise.progression.type) {
+                    case 'Add Weight':
+                        const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
+                        formula = `'${previousSheetName}'!${prevSheetCell}${add}`;
+                        break;
+                      case 'Add Percentage':
+                        // Increase previous reps by specified percentage
+                        const percentageMultiplier = 1 + (exercise.progression.amount / 100);
+                        formula = `ROUND('${previousSheetName}'!${prevSheetCell}*${percentageMultiplier},0)`;
+                        break;
+                      default:
+                        formula = `'${previousSheetName}'!${prevSheetCell}`;
+                        break;
+                   }
                     
                     ws[cellRef] = { t: 'n', f: formula };
                   }
                   break;
                 case 2:
-                  // Reps
                   break;
                 case 3:
                   // Target Reps
                   if (previousSheetName) {
-                    const prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex - 1 });
-
+                    const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex - 1 });
                     let formula;
 
                     switch(exercise.progression.type) {
                       case 'Add Reps':
                         // Increase previous reps by specified amount
-                        formula = `'${previousSheetName}'!${prevSheetRepsCell}+${exercise.progression.amount}`;
+                        formula = `'${previousSheetName}'!${prevSheetCell}+${exercise.progression.amount}`;
                         break;
                       case 'Add Percentage':
-                        // Increase previous reps by specified percentage
-                        const percentageMultiplier = 1 + (exercise.progression.amount / 100);
-                        formula = `ROUND('${previousSheetName}'!${prevSheetRepsCell}*${percentageMultiplier},0)`;
-                        break;
                       case 'Add Weight':
-                        // Keep same reps when progressing weight
-                        formula = `'${previousSheetName}'!${prevSheetRepsCell}`;
-                        break;
                       case 'None':
                       default:
                         // Keep same reps
-                        console.error(exercise.progression);
-                        formula = `'${previousSheetName}'!${prevSheetRepsCell}`;
+                        formula = `'${previousSheetName}'!${prevSheetCell}`;
                         break;
                     }
 
