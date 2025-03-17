@@ -13,6 +13,7 @@ import { Progression, ProgressionType } from '../../models/progression';
 import { SpreadsheetGenerationService } from '../../services/spreadsheet-generation.service';
 import { Day } from '../../models/training-day';
 import { sampleMeso } from '../../models/sample-meso';
+import { Exercise } from '../../models/training-exercise';
 
 @Component({
   selector: 'app-planner',
@@ -25,6 +26,20 @@ export class PlannerComponent implements OnInit {
   progressionTypes: ProgressionType[] = ['Add Weight', 'Add Reps', 'Add Percentage', 'None'];
   
   selectedMesoCycle: Mesocycle;
+  
+  // Add array of nice looking colors
+  private exerciseColors: string[] = [
+    '#FF6B6B', // coral red
+    '#4ECDC4', // turquoise
+    '#45B7D1', // sky blue
+    '#96CEB4', // sage green
+    '#FFEEAD', // cream yellow
+    '#D4A5A5', // dusty rose
+    '#9B89B3', // lavender
+    '#E9967A', // salmon
+    '#66CDAA', // medium aquamarine
+    '#F4A460'  // sandy brown
+  ];
 
   constructor(private spreadsheetService: SpreadsheetGenerationService) {
     // Try to load the last used mesocycle name
@@ -78,8 +93,8 @@ export class PlannerComponent implements OnInit {
     moveItemInArray(this.selectedMesoCycle.microcycles[0].days, event.previousIndex, event.currentIndex);
   }
 
-  dropExercise(event: CdkDragDrop<string[]>) {
-    moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+  dropExercise(event: CdkDragDrop<string[]>, exercise: Day) {
+    moveItemInArray(exercise.exercises, event.previousIndex, event.currentIndex);
   }
 
   addExercise(day: Day) {
@@ -87,13 +102,17 @@ export class PlannerComponent implements OnInit {
       day.exercises = [];
     }
     const newIndex = day.exercises.length;
+    
+    // Get random color from the array
+    const randomColor = this.exerciseColors[Math.floor(Math.random() * this.exerciseColors.length)];
+    
     day.exercises.push({
       name: `Exercise ${newIndex + 1}`,
       progression: {
         type: 'Add Weight',
         amount: 5
       },
-      color: "#ff0000",
+      color: randomColor,
       setCount: 3
     });
 
