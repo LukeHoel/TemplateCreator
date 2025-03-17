@@ -13,15 +13,96 @@ export class SpreadsheetGenerationService {
   generateAndDownloadSpreadsheet(mesocycle: Mesocycle): void {
     // Create workbook
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    
+
+    let previousSheetName: string | undefined = undefined;
     // Create a worksheet for each microcycle
     mesocycle.microcycles.forEach((microcycle, index) => {
       // Convert microcycle data to worksheet format
       const wsData = this.convertMicrocycleToWorksheetData(microcycle);
       const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(wsData);
+      if (!ws['!types']) ws['!types'] = [];
       
+      // Loop through each cell on the grid
+      Object.keys(ws)
+        .filter((key) => !key.startsWith('!'))
+        .forEach((key) => {
+          const cell = ws[key];
+          cell.t = 's';
+          const colIndex = XLSX.utils.decode_cell(key).c;
+          const rowIndex = XLSX.utils.decode_cell(key).r;
+          
+          // Skip header cells
+          if (rowIndex > 1) {
+            const dayIndex = Math.floor(colIndex / 4);
+            const exerciseIndex = rowIndex - 2;
+            const day = microcycle.days[dayIndex];
+            const exercises = [];
+            day.exercises.forEach(exercise => {
+              for (let setIndex = 0; setIndex < exercise.setCount; setIndex++) {
+                exercises.push(exercise);
+              }
+            });
+            const exercise = day.exercises[exerciseIndex];
+            if (exercise) {
+              const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+
+              switch (colIndex % 4) {
+                case 0:
+                  // Exercise name
+                  break;
+                case 1:
+                  // Weight
+                  if (previousSheetName) {
+                    const prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+                    const formula = `'${previousSheetName}'!${prevSheetRepsCell}`;
+                    
+                    ws[cellRef] = { t: 'n', f: formula };
+                  }
+                  break;
+                case 2:
+                  // Reps
+                  break;
+                case 3:
+                  // Target Reps
+                  if (previousSheetName) {
+                    const prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex - 1 });
+
+                    let formula;
+
+                    switch(exercise.progression.type) {
+                      case 'Add Reps':
+                        // Increase previous reps by specified amount
+                        formula = `'${previousSheetName}'!${prevSheetRepsCell}+${exercise.progression.amount}`;
+                        break;
+                      case 'Add Percentage':
+                        // Increase previous reps by specified percentage
+                        const percentageMultiplier = 1 + (exercise.progression.amount / 100);
+                        formula = `ROUND('${previousSheetName}'!${prevSheetRepsCell}*${percentageMultiplier},0)`;
+                        break;
+                      case 'Add Weight':
+                        // Keep same reps when progressing weight
+                        formula = `'${previousSheetName}'!${prevSheetRepsCell}`;
+                        break;
+                      case 'None':
+                      default:
+                        // Keep same reps
+                        console.error(exercise.progression);
+                        formula = `'${previousSheetName}'!${prevSheetRepsCell}`;
+                        break;
+                    }
+
+
+                    ws[cellRef] = { t: 'n', f: formula };
+                  }
+                  break;
+              }
+            }
+          }
+      });
+
       // Add the worksheet to the workbook
-      XLSX.utils.book_append_sheet(wb, ws, `Week ${index + 1}`);
+      previousSheetName = `Week ${index + 1}`;
+      XLSX.utils.book_append_sheet(wb, ws, previousSheetName);
     });
 
     // Generate the Excel file
@@ -102,4 +183,4 @@ export class SpreadsheetGenerationService {
 
     return [firstRow, secondRow, ...reorganizedRows];
   }
-} 
+}

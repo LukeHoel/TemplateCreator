@@ -120,7 +120,8 @@ export class PlannerComponent implements OnInit {
 
   generateSpreadsheet() {
     if (this.selectedMesoCycle) {
-      this.spreadsheetService.generateAndDownloadSpreadsheet(this.selectedMesoCycle);
+      const week = this.selectedMesoCycle.microcycles[0];
+      this.spreadsheetService.generateAndDownloadSpreadsheet({...this.selectedMesoCycle, microcycles: [week,week]});
     }
   }
 
