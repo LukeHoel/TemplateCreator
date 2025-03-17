@@ -1,5 +1,7 @@
+export type ProgressionType = 'Add Amount' | 'Add Reps' | 'Add Percentage' | 'None';
+
 export interface Progression {
-    type: string;
+    type: ProgressionType;
     unit: string;
     amount: number;
 }

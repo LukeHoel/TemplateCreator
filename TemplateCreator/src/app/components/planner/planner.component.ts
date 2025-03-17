@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { imports } from '../../app.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { Progression } from '../../models/progression';
+import { Progression, ProgressionType } from '../../models/progression';
 
 @Component({
   selector: 'app-planner',
@@ -19,7 +19,7 @@ import { Progression } from '../../models/progression';
   styleUrl: './planner.component.scss',
 })
 export class PlannerComponent implements OnInit {
-  progressionTypes = ['Add Percentage Amount', 'Add Amount', 'Add Reps', 'None'];
+  progressionTypes: ProgressionType[] = ['Add Amount', 'Add Reps', 'Add Percentage', 'None'];
   units = ['lbs', 'km', 'minutes'];
   
   sampleMesoCycle = {
@@ -91,7 +91,7 @@ export class PlannerComponent implements OnInit {
     day.exercises.push({
       name: `Exercise ${day.exercises.length + 1}`,
       progression: {
-        type: 'none',
+        type: 'Add Amount',
         unit: 'lbs',
         amount: 0
       }

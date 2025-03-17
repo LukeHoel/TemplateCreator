@@ -12,21 +12,13 @@
     }
 
     input, select {
-      padding: 4px 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      height: 32px;
-      font-size: 14px;
-      background: white;
 
       &:focus {
         outline: none;
         border-color: #1976d2;
       }
-    }
-
-    select {
-      width: 100px;
     }
   }
 
@@ -65,6 +57,10 @@
       padding: 8px;
       background: #fafafa;
       border-radius: 4px;
+      mat-card-content {
+        display: flex;
+        align-items: center;
+      }
     }
 
     .exercise-card {
@@ -85,25 +81,13 @@
         input, select {
           display: block;
           width: 100%;
-          padding: 4px 8px;
           border: 1px solid #ccc;
           border-radius: 4px;
-          height: 32px;
-          font-size: 14px;
-          margin-bottom: 4px;
-          
+          box-sizing: border-box;
           &:focus {
             outline: none;
             border-color: #1976d2;
           }
-        }
-
-        input[type="number"] {
-          width: 100px;
-        }
-
-        select {
-          width: 150px;
         }
 
         .delete-button {
@@ -113,11 +97,6 @@
 
       input {
         flex: 1;
-        border: none;
-        background: transparent;
-        text-align: center;
-        font-size: 14px;
-        color: #1976d2;
 
         &:focus {
           outline: none;
