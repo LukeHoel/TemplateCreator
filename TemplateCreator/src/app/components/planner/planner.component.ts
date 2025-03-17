@@ -11,6 +11,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Progression, ProgressionType } from '../../models/progression';
 import { SpreadsheetGenerationService } from '../../services/spreadsheet-generation.service';
+import { Day } from '../../models/training-day';
 
 @Component({
   selector: 'app-planner',
@@ -20,7 +21,7 @@ import { SpreadsheetGenerationService } from '../../services/spreadsheet-generat
   styleUrl: './planner.component.scss',
 })
 export class PlannerComponent implements OnInit {
-  progressionTypes: ProgressionType[] = ['Add Amount', 'Add Reps', 'Add Percentage', 'None'];
+  progressionTypes: ProgressionType[] = ['Add Weight', 'Add Reps', 'Add Percentage', 'None'];
   
   sampleMesoCycle = {
     name: 'Mesocycle',
@@ -84,17 +85,18 @@ export class PlannerComponent implements OnInit {
     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
   }
 
-  addExercise(day: any) {
+  addExercise(day: Day) {
     if (!day.exercises) {
       day.exercises = [];
     }
     day.exercises.push({
       name: `Exercise ${day.exercises.length + 1}`,
       progression: {
-        type: 'Add Amount',
-        unit: 'lbs',
-        amount: 0
-      }
+        type: 'Add Weight',
+        amount: 5
+      },
+      color: "#ff0000",
+      setCount: 3
     });
   }
 
