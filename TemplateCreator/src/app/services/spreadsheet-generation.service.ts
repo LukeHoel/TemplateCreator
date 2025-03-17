@@ -31,9 +31,6 @@ export class SpreadsheetGenerationService {
   private convertMicrocycleToWorksheetData(microcycle: Microcycle): any[][] {
     const rows: any[][] = [];
     const headerRow: any[] = [];
-    microcycle.days.forEach((day) => headerRow.push(day.name, '', '', ''));
-    microcycle.days.forEach((day) => headerRow.push('Exercise', 'Weight', 'Reps', 'Target Reps'));
-    rows.push(headerRow);
 
     // Find the maximum number of exercises across all days
     const maxExercises = Math.max(...microcycle.days.map(day => day.exercises.length));
@@ -69,14 +66,14 @@ export class SpreadsheetGenerationService {
     }
 
     // Reorganize rows to align exercises for each day
-    const reorganizedRows: any[][] = [headerRow];
+    const reorganizedRows: any[][] = [];
     const daysCount = microcycle.days.length;
     const columnsPerDay = 4;
     
     // For each day
     for (let dayIndex = 0; dayIndex < daysCount; dayIndex++) {
       // Get all rows for this day (every 4th column starting at dayIndex * 4)
-      const dayRows = rows.slice(1).map(row => {
+      const dayRows = rows.slice(0).map(row => {
         const dayData = row.slice(dayIndex * columnsPerDay, (dayIndex + 1) * columnsPerDay);
         return dayData;
       });
@@ -93,11 +90,16 @@ export class SpreadsheetGenerationService {
         
         // Add the row data at the correct position
         for (let colIndex = 0; colIndex < columnsPerDay; colIndex++) {
-          reorganizedRows[nonEmptyRows.indexOf(row) + 1][dayIndex * columnsPerDay + colIndex] = row[colIndex];
+          reorganizedRows[nonEmptyRows.indexOf(row)][dayIndex * columnsPerDay + colIndex] = row[colIndex];
         }
       });
     }
 
-    return reorganizedRows;
+    const firstRow: any[] = [];
+    const secondRow: any[] = [];
+    microcycle.days.forEach((day) => firstRow.push(day.name, '', '', ''));
+    microcycle.days.forEach((day) => secondRow.push('Exercise', 'Weight', 'Reps', 'Target Reps'));
+
+    return [firstRow, secondRow, ...reorganizedRows];
   }
 } 
