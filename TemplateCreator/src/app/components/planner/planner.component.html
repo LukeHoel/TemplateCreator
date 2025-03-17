@@ -9,6 +9,11 @@
             <mat-icon>save</mat-icon>
             Save
         </button>
+
+        <button mat-raised-button color="accent" (click)="generateSpreadsheet()">
+            <mat-icon>download</mat-icon>
+            Download Spreadsheet
+        </button>
     </div>
     
     <div class="days-container" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">
@@ -37,9 +42,9 @@
                                     <input *ngIf="exercise.progression.type !== 'None'" 
                                         type="number" 
                                         [(ngModel)]="exercise.progression.amount">
-                                    <select [(ngModel)]="exercise.progression.unit">
-                                        <option *ngFor="let unit of units" [value]="unit">
-                                            {{unit}}
+                                    <select [(ngModel)]="exercise.setCount">
+                                        <option *ngFor="let count of [1,2,3,4,5]" [value]="count">
+                                            {{count}} {{count === 1 ? 'Set' : 'Sets'}}
                                         </option>
                                     </select>
                                 </div>

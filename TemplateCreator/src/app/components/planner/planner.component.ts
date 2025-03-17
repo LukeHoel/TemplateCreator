@@ -10,6 +10,7 @@ import { imports } from '../../app.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Progression, ProgressionType } from '../../models/progression';
+import { SpreadsheetGenerationService } from '../../services/spreadsheet-generation.service';
 
 @Component({
   selector: 'app-planner',
@@ -20,7 +21,6 @@ import { Progression, ProgressionType } from '../../models/progression';
 })
 export class PlannerComponent implements OnInit {
   progressionTypes: ProgressionType[] = ['Add Amount', 'Add Reps', 'Add Percentage', 'None'];
-  units = ['lbs', 'km', 'minutes'];
   
   sampleMesoCycle = {
     name: 'Mesocycle',
@@ -38,7 +38,7 @@ export class PlannerComponent implements OnInit {
   };
   selectedMesoCycle: Mesocycle;
 
-  constructor() {
+  constructor(private spreadsheetService: SpreadsheetGenerationService) {
     // Try to load the last used mesocycle name
     const lastMesocycleName = localStorage.getItem('lastMesocycleName');
     if (lastMesocycleName) {
@@ -104,5 +104,11 @@ export class PlannerComponent implements OnInit {
 
   removeDay(dayIndex: number) {
     this.selectedMesoCycle.microcycles[0].days.splice(dayIndex, 1);
+  }
+
+  generateSpreadsheet() {
+    if (this.selectedMesoCycle) {
+      this.spreadsheetService.generateAndDownloadSpreadsheet(this.selectedMesoCycle);
+    }
   }
 }
