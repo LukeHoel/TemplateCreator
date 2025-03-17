@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Mesocycle } from '../models/mesocycle';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { Microcycle } from '../models/microcycle';
 
 @Injectable({
@@ -43,7 +43,6 @@ export class SpreadsheetGenerationService {
               }
             });
             const exercise = exercises[exerciseIndex];
-            console.error(exercise, rowIndex, colIndex);    
             if (exercise) {
               const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
               let prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
@@ -106,6 +105,21 @@ export class SpreadsheetGenerationService {
                     ws[cellRef] = { t: 'n', f: formula };
                   }
                   break;
+              }
+
+              // Add cell styling if exercise has a color - moved after switch statement
+              if (exercise?.color) {
+                if (!ws['!cols']) ws['!cols'] = [];
+                if (!ws['!rows']) ws['!rows'] = [];
+                
+                // Set the cell fill color
+                if (!ws[cellRef].s) ws[cellRef].s = {};
+                ws[cellRef].s = {
+                  ...ws[cellRef].s,
+                  fill: {
+                    fgColor: { rgb: exercise.color.replace('#', '') },
+                  }
+                };
               }
             }
           }
