@@ -84,20 +84,21 @@ export class SpreadsheetGenerationService {
                 case 3:
                   // Target Reps
                   if (previousSheetName) {
-                    const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex - 1 });
+                    const prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex - 1 });
+                    const prevSheetTargetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
                     let formula;
 
                     switch(exercise.progression.type) {
                       case 'Add Reps':
                         // Increase previous reps by specified amount
-                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}+${exercise.progression.amount})`;
+                        formula = `IF('${previousSheetName}'!${prevSheetRepsCell}="",IF('${previousSheetName}'!${prevSheetTargetRepsCell}="","",'${previousSheetName}'!${prevSheetTargetRepsCell}+${exercise.progression.amount}),'${previousSheetName}'!${prevSheetRepsCell}+${exercise.progression.amount})`;
                         break;
                       case 'Add Percentage':
                       case 'Add Weight':
                       case 'None':
                       default:
                         // Keep same reps
-                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
+                        formula = `IF('${previousSheetName}'!${prevSheetRepsCell}="",IF('${previousSheetName}'!${prevSheetTargetRepsCell}="","",'${previousSheetName}'!${prevSheetTargetRepsCell}),'${previousSheetName}'!${prevSheetRepsCell})`;
                         break;
                     }
 
