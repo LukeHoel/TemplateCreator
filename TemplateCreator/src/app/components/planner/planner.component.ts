@@ -115,12 +115,17 @@ export class PlannerComponent implements OnInit {
   exportTemplate() {
     if (!this.selectedMesoCycle) return;
     
-    const dataStr = JSON.stringify(this.selectedMesoCycle, null, 2);
+    const exportMesocycle = {
+      ...this.selectedMesoCycle,
+      name: `${this.selectedMesoCycle.name}_copy`
+    };
+    
+    const dataStr = JSON.stringify(exportMesocycle, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${this.selectedMesoCycle.name}.json`;
+    link.download = `${exportMesocycle.name}.json`;
     link.click();
     window.URL.revokeObjectURL(url);
   }
