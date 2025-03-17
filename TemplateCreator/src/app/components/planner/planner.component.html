@@ -43,7 +43,7 @@
             <mat-card class="day-card">
                 <mat-card-header>
                     <mat-card-title>
-                        <input [(ngModel)]="item.name" placeholder="Day Name">
+                        <input [id]="'day-name-' + i" [(ngModel)]="item.name" placeholder="Day Name">
                     </mat-card-title>
                     <button mat-icon-button color="warn" (click)="removeDay(i)">
                         <mat-icon>delete</mat-icon>

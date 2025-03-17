@@ -64,9 +64,19 @@ export class PlannerComponent implements OnInit {
     if (!this.selectedMesoCycle) {
       return;
     }
+    const newIndex = this.selectedMesoCycle.microcycles[0].days.length;
     this.selectedMesoCycle.microcycles[0].days.push({
-      name: `Day ${this.selectedMesoCycle.microcycles[0].days.length + 1}`,
+      name: `Day ${newIndex + 1}`,
       exercises: [],
+    });
+    
+    // Allow time for the DOM to update
+    setTimeout(() => {
+      const dayInput = document.querySelector(`#day-name-${newIndex}`) as HTMLInputElement;
+      if (dayInput) {
+        dayInput.focus();
+        dayInput.select();
+      }
     });
   }
 
