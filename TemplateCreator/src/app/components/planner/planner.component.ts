@@ -223,4 +223,21 @@ export class PlannerComponent implements OnInit {
       console.log('No mesocycle found with that name');
     }
   }
+
+  onProgressionTypeChange(newType: ProgressionType, exercise: Exercise) {
+    switch (newType) {
+      case 'Add Reps':
+        exercise.progression.amount = 1;
+        break;
+      case 'Add Weight':
+        exercise.progression.amount = 5;
+        break;
+      case 'Add Percentage':
+        exercise.progression.amount = 10;
+        break;
+      case 'None':
+        exercise.progression.amount = 0;
+        break;
+    }
+  }
 }

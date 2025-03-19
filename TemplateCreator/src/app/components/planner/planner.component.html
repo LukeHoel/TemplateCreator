@@ -66,7 +66,7 @@
                                     <input [id]="'exercise-name-' + o + '-' + i" 
                                            [(ngModel)]="exercise.name" 
                                            placeholder="Exercise Name">
-                                    <select [(ngModel)]="exercise.progression.type">
+                                    <select [(ngModel)]="exercise.progression.type" (ngModelChange)="onProgressionTypeChange($event, exercise)">
                                         <option *ngFor="let type of progressionTypes" [value]="type">
                                             {{type}}
                                         </option>
