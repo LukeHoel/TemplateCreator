@@ -69,28 +69,37 @@ export class SpreadsheetGenerationService {
                   break;
                 case 1:
                   // Weight
-                  if (previousSheetName) {
-                    const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
-                    let formula;
-                    switch(exercise.progression.type) {
-                      case 'Add Weight':
-                        const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
-                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}${add})`;
-                        break;
-                      case 'Add Percentage':
-                        // Increase previous reps by specified percentage
-                        const percentageMultiplier = 1 + (exercise.progression.amount / 100);
-                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",ROUND('${previousSheetName}'!${prevSheetCell}*${percentageMultiplier},0))`;
-                        break;
-                      default:
-                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
-                        break;
+                  if (isFirstRow) {
+                    if (previousSheetName) {
+                      const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+                      let formula;
+                      switch(exercise.progression.type) {
+                        case 'Add Weight':
+                          const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
+                          formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}${add})`;
+                          break;
+                        case 'Add Percentage':
+                          // Increase previous reps by specified percentage
+                          const percentageMultiplier = 1 + (exercise.progression.amount / 100);
+                          formula = `IF('${previousSheetName}'!${prevSheetCell}="","",ROUND('${previousSheetName}'!${prevSheetCell}*${percentageMultiplier},0))`;
+                          break;
+                        default:
+                          formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
+                          break;
+                      }
+                      
+                      ws[cellRef] = { t: 'n', f: formula };
+                    } else if (exercise.progression.startingWeight > 0) {
+                      // For first week, use starting weight if available
+                      ws[cellRef] = { t: 'n', v: exercise.progression.startingWeight };
+                    } 
+                  }
+                  else {
+                    // Check if cell above has same color and reference its value
+                    const prevRowCell = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+                    if (ws[prevRowCell]?.s?.fill?.fgColor?.rgb === exercise.color.replace('#', '')) {
+                      ws[cellRef] = { t: 'n', f: `=${prevRowCell}` };
                     }
-                    
-                    ws[cellRef] = { t: 'n', f: formula };
-                  } else if (exercise.progression.startingWeight > 0) {
-                    // For first week, use starting weight if available
-                    ws[cellRef] = { t: 'n', v: exercise.progression.startingWeight };
                   }
                   break;
                 case 2:
