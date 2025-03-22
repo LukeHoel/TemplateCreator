@@ -454,6 +454,12 @@ export class SpreadsheetGenerationService {
                       }
                       if (firstSheet[firstRepsKey] && firstSheet[firstRepsKey].v) {
                         exerciseData[exerciseName].startingReps = Number(firstSheet[firstRepsKey].v);
+                      } else {
+                        // Try to get target reps as fallback
+                        const firstTargetRepsKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 3 });
+                        if (firstSheet[firstTargetRepsKey] && firstSheet[firstTargetRepsKey].v) {
+                          exerciseData[exerciseName].startingReps = Number(firstSheet[firstTargetRepsKey].v);
+                        }
                       }
                     }
                   }
