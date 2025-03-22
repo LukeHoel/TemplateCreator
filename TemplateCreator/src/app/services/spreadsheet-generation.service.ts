@@ -45,7 +45,6 @@ export class SpreadsheetGenerationService {
             const exercise = exercises[exerciseIndex];
             if (exercise) {
               const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
-              let prevSheetRepsCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
 
               switch (colIndex % 4) {
                 case 0:
@@ -62,7 +61,7 @@ export class SpreadsheetGenerationService {
                     const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
                     let formula;
                     switch(exercise.progression.type) {
-                    case 'Add Weight':
+                      case 'Add Weight':
                         const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
                         formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}${add})`;
                         break;
@@ -74,9 +73,12 @@ export class SpreadsheetGenerationService {
                       default:
                         formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
                         break;
-                   }
+                    }
                     
                     ws[cellRef] = { t: 'n', f: formula };
+                  } else if (exercise.progression.startingWeight > 0) {
+                    // For first week, use starting weight if available
+                    ws[cellRef] = { t: 'n', v: exercise.progression.startingWeight };
                   }
                   break;
                 case 2:
@@ -103,6 +105,9 @@ export class SpreadsheetGenerationService {
                     }
 
                     ws[cellRef] = { t: 'n', f: formula };
+                  } else if (exercise.progression.startingReps > 0) {
+                    // For first week, use starting reps if available
+                    ws[cellRef] = { t: 'n', v: exercise.progression.startingReps };
                   }
                   break;
               }
@@ -276,7 +281,7 @@ export class SpreadsheetGenerationService {
     });
   }
 
-  updateProgressionFromSpreadsheet(file: File): Promise<{ [key: string]: { weight: number, reps: number }}> {
+  updateProgressionFromSpreadsheet(file: File): Promise<{ [key: string]: { weight: number, reps: number, startingWeight: number, startingReps: number }}> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
@@ -286,41 +291,113 @@ export class SpreadsheetGenerationService {
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
           const wb = XLSX.read(data, { type: 'array' });
           
-          // Get the last sheet
-          const lastSheetName = wb.SheetNames[wb.SheetNames.length - 1];
-          const sheet = wb.Sheets[lastSheetName];
+          // Find the last sheet with manually entered values and first sheet with any data
+          let lastSheetWithData: { sheet: XLSX.WorkSheet, name: string } | null = null;
+          let firstSheetWithData: { sheet: XLSX.WorkSheet, name: string } | null = null;
+          
+          // First pass: find first sheet with any data
+          for (let i = 0; i < wb.SheetNames.length; i++) {
+            const sheetName = wb.SheetNames[i];
+            const sheet = wb.Sheets[sheetName];
+            let hasData = false;
+
+            Object.keys(sheet)
+              .filter(key => !key.startsWith('!'))
+              .forEach(key => {
+                const cell = XLSX.utils.decode_cell(key);
+                if (cell.r > 1) {
+                  if (cell.c % 4 === 1 || cell.c % 4 === 2) {
+                    const cellData = sheet[key];
+                    if (cellData && cellData.v !== '') {
+                      hasData = true;
+                    }
+                  }
+                }
+              });
+
+            if (hasData) {
+              firstSheetWithData = { sheet, name: sheetName };
+              break;
+            }
+          }
+
+          // Second pass: find last sheet with manual data
+          for (let i = wb.SheetNames.length - 1; i >= 0; i--) {
+            const sheetName = wb.SheetNames[i];
+            const sheet = wb.Sheets[sheetName];
+            let hasManualData = false;
+
+            Object.keys(sheet)
+              .filter(key => !key.startsWith('!'))
+              .forEach(key => {
+                const cell = XLSX.utils.decode_cell(key);
+                if (cell.r > 1) {
+                  if (cell.c % 4 === 1 || cell.c % 4 === 2) {
+                    const cellData = sheet[key];
+                    if (cellData && cellData.v !== '' && !cellData.f) {
+                      hasManualData = true;
+                    }
+                  }
+                }
+              });
+
+            if (hasManualData) {
+              lastSheetWithData = { sheet, name: sheetName };
+              break;
+            }
+          }
+
+          // If no sheet with manual data found, return empty data
+          if (!lastSheetWithData) {
+            resolve({});
+            return;
+          }
+
+          const sheet = lastSheetWithData.sheet;
+          console.log(`Using data from sheet: ${lastSheetWithData.name}`);
 
           // Create map to store exercise data
-          const exerciseData: { [key: string]: { weight: number, reps: number } } = {};
+          const exerciseData: { [key: string]: { weight: number, reps: number, startingWeight: number, startingReps: number } } = {};
 
           // Process each cell
           Object.keys(sheet)
             .filter(key => !key.startsWith('!'))
             .forEach(key => {
               const cell = XLSX.utils.decode_cell(key);
-              // Skip header rows (first 2 rows)
               if (cell.r > 1) {
                 const dayIndex = Math.floor(cell.c / 4);
-                const columnType = cell.c % 4; // 0 = name, 1 = weight, 2 = reps
+                const columnType = cell.c % 4;
 
                 if (columnType === 0) {
-                  // This is an exercise name cell
                   const exerciseName = sheet[key].v;
                   if (exerciseName && exerciseName.trim() !== '') {
-                    // Initialize data for this exercise if not exists
                     if (!exerciseData[exerciseName]) {
-                      exerciseData[exerciseName] = { weight: 0, reps: 0 };
+                      exerciseData[exerciseName] = { weight: 0, reps: 0, startingWeight: 0, startingReps: 0 };
                     }
                     
-                    // Get weight and reps from adjacent cells
                     const weightKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 1 });
                     const repsKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 2 });
                     
-                    if (sheet[weightKey] && sheet[weightKey].v) {
+                    // Get current values from last sheet with manual data
+                    if (sheet[weightKey] && sheet[weightKey].v && !sheet[weightKey].f) {
                       exerciseData[exerciseName].weight = Number(sheet[weightKey].v);
                     }
-                    if (sheet[repsKey] && sheet[repsKey].v) {
+                    if (sheet[repsKey] && sheet[repsKey].v && !sheet[repsKey].f) {
                       exerciseData[exerciseName].reps = Number(sheet[repsKey].v);
+                    }
+
+                    // Get starting values from first sheet with data
+                    if (firstSheetWithData) {
+                      const firstSheet = firstSheetWithData.sheet;
+                      const firstWeightKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 1 });
+                      const firstRepsKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 2 });
+
+                      if (firstSheet[firstWeightKey] && firstSheet[firstWeightKey].v) {
+                        exerciseData[exerciseName].startingWeight = Number(firstSheet[firstWeightKey].v);
+                      }
+                      if (firstSheet[firstRepsKey] && firstSheet[firstRepsKey].v) {
+                        exerciseData[exerciseName].startingReps = Number(firstSheet[firstRepsKey].v);
+                      }
                     }
                   }
                 }

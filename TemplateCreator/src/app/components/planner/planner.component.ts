@@ -295,30 +295,22 @@ export class PlannerComponent implements OnInit {
         day.exercises.forEach(exercise => {
           const data = exerciseData[exercise.name];
           if (data) {
-            // Always store the starting values if they exist
-            if (data.weight > 0) {
-              exercise.progression.startingWeight = data.weight;
-            }
-            if (data.reps > 0) {
-              exercise.progression.startingReps = data.reps;
-            }
-
             // Set the progression type and amount based on the data
             if (data.weight > 0) {
               exercise.progression = {
                 ...exercise.progression,
                 type: 'Add Weight',
                 amount: 5, // Default weight increment
-                startingWeight: data.weight,
-                startingReps: data.reps || exercise.progression.startingReps
+                startingWeight: data.startingWeight > 0 ? data.startingWeight : data.weight,
+                startingReps: data.startingReps > 0 ? data.startingReps : (data.reps || exercise.progression.startingReps)
               };
             } else if (data.reps > 0) {
               exercise.progression = {
                 ...exercise.progression,
                 type: 'Add Reps',
                 amount: 1, // Default rep increment
-                startingWeight: data.weight || exercise.progression.startingWeight,
-                startingReps: data.reps
+                startingWeight: data.startingWeight > 0 ? data.startingWeight : exercise.progression.startingWeight,
+                startingReps: data.startingReps > 0 ? data.startingReps : data.reps
               };
             }
           }
