@@ -43,7 +43,19 @@ export class SpreadsheetGenerationService {
               }
             });
             const exercise = exercises[exerciseIndex];
+            // variable to track if the exercise is the first row of the exercise for the day
+            let isFirstRow = false;
             if (exercise) {
+              // Check if this is the first row for this exercise in the current day by looking at the previous row
+              const prevRowIndex = rowIndex - 1;
+              const prevRowDayIndex = Math.floor(colIndex / 4);
+              const prevRowExerciseIndex = prevRowIndex - 2;
+              
+              // If previous row is in a different day or has a different exercise, this is the first row
+              isFirstRow = prevRowDayIndex !== dayIndex || 
+                         !exercises[prevRowExerciseIndex] || 
+                         exercises[prevRowExerciseIndex].name !== exercise.name;
+
               const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
 
               switch (colIndex % 4) {
@@ -105,7 +117,7 @@ export class SpreadsheetGenerationService {
                     }
 
                     ws[cellRef] = { t: 'n', f: formula };
-                  } else if (exercise.progression.startingReps > 0) {
+                  } else if (exercise.progression.startingReps > 0 && isFirstRow) {
                     // For first week, use starting reps if available
                     ws[cellRef] = { t: 'n', v: exercise.progression.startingReps };
                   }
