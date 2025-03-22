@@ -113,7 +113,7 @@ export class SpreadsheetGenerationService {
                     // Check if cell above has same color and reference its value
                     const prevRowCell = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
                     if (ws[prevRowCell]?.s?.fill?.fgColor?.rgb === exercise.color.replace('#', '')) {
-                      ws[cellRef] = { t: 'n', f: `=${prevRowCell}` };
+                      ws[cellRef] = { t: 'n', f: `=IF(${prevRowCell}="","",${prevRowCell})` };
                     }
                   }
                   break;
