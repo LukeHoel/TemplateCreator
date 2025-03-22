@@ -87,6 +87,7 @@
         input, select {
           display: block;
           width: 100%;
+          min-width: 50px;
           border: 1px solid #ccc;
           border-radius: 4px;
           box-sizing: border-box;
@@ -168,4 +169,53 @@
   color: rgb(0, 92, 187);
   font-weight: bold;
   letter-spacing: 0.096px;
+}
+
+.progression-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0;
+  
+  .progression-amount, .starting-values {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    label {
+      font-size: 0.9em;
+      min-width: 100px;
+    }
+    
+    input {
+      width: 80px;
+      padding: 4px;
+    }
+  }
+
+  .starting-values {
+    display: flex;
+    gap: 16px;
+    
+    .weight-input, .reps-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+
+.exercise-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  
+  input[type="number"] {
+    width: 80px;
+  }
+  
+  select {
+    width: fit-content;
+  }
 }

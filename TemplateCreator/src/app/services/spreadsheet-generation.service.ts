@@ -210,4 +210,131 @@ export class SpreadsheetGenerationService {
 
     return [firstRow, secondRow, ...reorganizedRows];
   }
+
+  copyLastWeekData(sourceFile: File, targetFile: File): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        try {
+          // Read source workbook
+          const sourceData = new Uint8Array(e.target?.result as ArrayBuffer);
+          const sourceWb = XLSX.read(sourceData, { type: 'array' });
+          
+          // Get the last sheet from source workbook
+          const sourceSheetName = sourceWb.SheetNames[sourceWb.SheetNames.length - 1];
+          const sourceSheet = sourceWb.Sheets[sourceSheetName];
+
+          // Read target workbook
+          const targetReader = new FileReader();
+          targetReader.onload = (e2: ProgressEvent<FileReader>) => {
+            try {
+              const targetData = new Uint8Array(e2.target?.result as ArrayBuffer);
+              const targetWb = XLSX.read(targetData, { type: 'array' });
+              
+              // Get the first sheet from target workbook
+              const targetSheetName = targetWb.SheetNames[0];
+              const targetSheet = targetWb.Sheets[targetSheetName];
+
+              // Copy weight and reps data
+              Object.keys(sourceSheet)
+                .filter(key => !key.startsWith('!'))
+                .forEach(key => {
+                  const cell = XLSX.utils.decode_cell(key);
+                  // Skip header rows (first 2 rows)
+                  if (cell.r > 1) {
+                    // Check if this is a weight column (remainder 1 when divided by 4)
+                    // or a reps column (remainder 2 when divided by 4)
+                    if (cell.c % 4 === 1 || cell.c % 4 === 2) {
+                      const sourceCell = sourceSheet[key];
+                      if (sourceCell && sourceCell.v !== '') {
+                        targetSheet[key] = { ...sourceCell };
+                      }
+                    }
+                  }
+                });
+
+              // Write the modified workbook to a new file
+              const newFileName = targetFile.name.replace('.xlsx', '_updated.xlsx');
+              XLSX.writeFile(targetWb, newFileName);
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          };
+
+          targetReader.onerror = () => reject(new Error('Error reading target file'));
+          targetReader.readAsArrayBuffer(targetFile);
+
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      reader.onerror = () => reject(new Error('Error reading source file'));
+      reader.readAsArrayBuffer(sourceFile);
+    });
+  }
+
+  updateProgressionFromSpreadsheet(file: File): Promise<{ [key: string]: { weight: number, reps: number }}> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        try {
+          // Read workbook
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const wb = XLSX.read(data, { type: 'array' });
+          
+          // Get the last sheet
+          const lastSheetName = wb.SheetNames[wb.SheetNames.length - 1];
+          const sheet = wb.Sheets[lastSheetName];
+
+          // Create map to store exercise data
+          const exerciseData: { [key: string]: { weight: number, reps: number } } = {};
+
+          // Process each cell
+          Object.keys(sheet)
+            .filter(key => !key.startsWith('!'))
+            .forEach(key => {
+              const cell = XLSX.utils.decode_cell(key);
+              // Skip header rows (first 2 rows)
+              if (cell.r > 1) {
+                const dayIndex = Math.floor(cell.c / 4);
+                const columnType = cell.c % 4; // 0 = name, 1 = weight, 2 = reps
+
+                if (columnType === 0) {
+                  // This is an exercise name cell
+                  const exerciseName = sheet[key].v;
+                  if (exerciseName && exerciseName.trim() !== '') {
+                    // Initialize data for this exercise if not exists
+                    if (!exerciseData[exerciseName]) {
+                      exerciseData[exerciseName] = { weight: 0, reps: 0 };
+                    }
+                    
+                    // Get weight and reps from adjacent cells
+                    const weightKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 1 });
+                    const repsKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 2 });
+                    
+                    if (sheet[weightKey] && sheet[weightKey].v) {
+                      exerciseData[exerciseName].weight = Number(sheet[weightKey].v);
+                    }
+                    if (sheet[repsKey] && sheet[repsKey].v) {
+                      exerciseData[exerciseName].reps = Number(sheet[repsKey].v);
+                    }
+                  }
+                }
+              }
+            });
+
+          resolve(exerciseData);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      reader.onerror = () => reject(new Error('Error reading file'));
+      reader.readAsArrayBuffer(file);
+    });
+  }
 }

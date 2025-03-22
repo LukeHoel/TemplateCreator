@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Mesocycle } from '../../models/mesocycle';
 import { MatListModule } from '@angular/material/list';
@@ -42,6 +42,12 @@ export class PlannerComponent implements OnInit {
     '#F9C846', // "Forearms",
     '#297373', // "Abs"
   ];
+
+  private sourceFile: File | null = null;
+  private targetFile: File | null = null;
+
+  @ViewChild('sourceFileInput') sourceFileInput!: ElementRef;
+  @ViewChild('spreadsheetInput') spreadsheetInput!: ElementRef;
 
   constructor(private spreadsheetService: SpreadsheetGenerationService) {
     // Try to load the last used mesocycle name
@@ -120,7 +126,6 @@ export class PlannerComponent implements OnInit {
     }
     const newIndex = day.exercises.length;
     
-    // Get available colors and pick a random one
     const availableColors = this.getAvailableColors(day);
     const randomColor = this.getRandomColor(availableColors);
     
@@ -128,7 +133,9 @@ export class PlannerComponent implements OnInit {
       name: `Exercise ${newIndex + 1}`,
       progression: {
         type: 'Add Weight',
-        amount: 5
+        amount: 5,
+        startingWeight: 0,
+        startingReps: 0
       },
       color: randomColor,
       setCount: 3
@@ -225,19 +232,107 @@ export class PlannerComponent implements OnInit {
   }
 
   onProgressionTypeChange(newType: ProgressionType, exercise: Exercise) {
+    const currentProgression = exercise.progression;
+    
     switch (newType) {
       case 'Add Reps':
-        exercise.progression.amount = 1;
+        exercise.progression = {
+          ...currentProgression,
+          type: newType,
+          amount: 1
+        };
         break;
       case 'Add Weight':
-        exercise.progression.amount = 5;
+        exercise.progression = {
+          ...currentProgression,
+          type: newType,
+          amount: 5
+        };
         break;
       case 'Add Percentage':
-        exercise.progression.amount = 10;
+        exercise.progression = {
+          ...currentProgression,
+          type: newType,
+          amount: 10
+        };
         break;
       case 'None':
-        exercise.progression.amount = 0;
+        exercise.progression = {
+          ...currentProgression,
+          type: newType,
+          amount: 0
+        };
         break;
+    }
+  }
+
+  startCopyLastWeek() {
+    // Reset files
+    this.sourceFile = null;
+    this.targetFile = null;
+    
+    // Trigger source file selection using ViewChild reference
+    this.sourceFileInput.nativeElement.click();
+  }
+
+  onSourceFileSelected(event: any) {
+    this.sourceFile = event.target.files[0];
+    if (this.sourceFile) {
+      // Now trigger target file selection using ViewChild reference
+      this.spreadsheetInput.nativeElement.click();
+    }
+  }
+
+  async updateProgressionFromSpreadsheet(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const exerciseData = await this.spreadsheetService.updateProgressionFromSpreadsheet(file);
+      
+      // Update progression data for matching exercises
+      this.selectedMesoCycle.microcycles[0].days.forEach(day => {
+        day.exercises.forEach(exercise => {
+          const data = exerciseData[exercise.name];
+          if (data) {
+            // Always store the starting values if they exist
+            if (data.weight > 0) {
+              exercise.progression.startingWeight = data.weight;
+            }
+            if (data.reps > 0) {
+              exercise.progression.startingReps = data.reps;
+            }
+
+            // Set the progression type and amount based on the data
+            if (data.weight > 0) {
+              exercise.progression = {
+                ...exercise.progression,
+                type: 'Add Weight',
+                amount: 5, // Default weight increment
+                startingWeight: data.weight,
+                startingReps: data.reps || exercise.progression.startingReps
+              };
+            } else if (data.reps > 0) {
+              exercise.progression = {
+                ...exercise.progression,
+                type: 'Add Reps',
+                amount: 1, // Default rep increment
+                startingWeight: data.weight || exercise.progression.startingWeight,
+                startingReps: data.reps
+              };
+            }
+          }
+        });
+      });
+
+      // Clear the file input
+      this.spreadsheetInput.nativeElement.value = '';
+      
+      // Show success message
+      alert('Progression data updated successfully from spreadsheet!');
+    } catch (error) {
+      console.error('Error updating progression data:', error);
+      alert('Error updating progression data. Please check the console for details.');
     }
   }
 }

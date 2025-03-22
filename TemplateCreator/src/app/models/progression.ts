@@ -3,4 +3,6 @@ export type ProgressionType = 'Add Weight' | 'Add Reps' | 'Add Percentage' | 'No
 export interface Progression {
     type: ProgressionType;
     amount: number;
+    startingWeight?: number;
+    startingReps?: number;
 }

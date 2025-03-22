@@ -33,14 +33,14 @@
 
         <input
             type="file"
-            #fileInput
+            #spreadsheetInput
             style="display: none"
-            accept=".json"
-            (change)="importTemplate($event)"
+            accept=".xlsx"
+            (change)="updateProgressionFromSpreadsheet($event)"
         >
-        <button mat-raised-button color="primary" (click)="fileInput.click()">
-            <mat-icon>upload</mat-icon>
-            Import Template
+        <button mat-raised-button color="primary" (click)="spreadsheetInput.click()">
+            <mat-icon>update</mat-icon>
+            Update From Spreadsheet
         </button>
     </div>
     
@@ -71,9 +71,27 @@
                                             {{type}}
                                         </option>
                                     </select>
-                                    <input *ngIf="exercise.progression.type !== 'None'" 
-                                        type="number" 
-                                        [(ngModel)]="exercise.progression.amount">
+                                    <div class="progression-inputs">
+                                        <div class="progression-amount" *ngIf="exercise.progression.type !== 'None'">
+                                            <label>Progress by:</label>
+                                            <input type="number" 
+                                                   [(ngModel)]="exercise.progression.amount">
+                                        </div>
+                                        <div class="starting-values">
+                                            <div class="weight-input">
+                                                <label>Starting Weight:</label>
+                                                <input type="number" 
+                                                       [(ngModel)]="exercise.progression.startingWeight"
+                                                       placeholder="0">
+                                            </div>
+                                            <div class="reps-input">
+                                                <label>Starting Reps:</label>
+                                                <input type="number" 
+                                                       [(ngModel)]="exercise.progression.startingReps"
+                                                       placeholder="0">
+                                            </div>
+                                        </div>
+                                    </div>
                                     <select [(ngModel)]="exercise.setCount">
                                         <option *ngFor="let count of [1,2,3,4,5]" [value]="count">
                                             {{count}} {{count === 1 ? 'Set' : 'Sets'}}
