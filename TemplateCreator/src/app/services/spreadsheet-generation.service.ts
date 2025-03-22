@@ -444,8 +444,8 @@ export class SpreadsheetGenerationService {
                     }
 
                     // Get starting values from first sheet with data
-                    if (firstSheetWithData) {
-                      const firstSheet = firstSheetWithData.sheet;
+                    if (lastSheetWithData) {
+                      const firstSheet = lastSheetWithData.sheet;
                       const firstWeightKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 1 });
                       const firstRepsKey = XLSX.utils.encode_cell({ r: cell.r, c: cell.c + 2 });
 

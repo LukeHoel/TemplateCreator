@@ -295,24 +295,11 @@ export class PlannerComponent implements OnInit {
         day.exercises.forEach(exercise => {
           const data = exerciseData[exercise.name];
           if (data) {
-            // Set the progression type and amount based on the data
-            if (data.weight > 0) {
-              exercise.progression = {
-                ...exercise.progression,
-                type: 'Add Weight',
-                amount: 5, // Default weight increment
-                startingWeight: data.startingWeight > 0 ? data.startingWeight : data.weight,
-                startingReps: data.startingReps > 0 ? data.startingReps : (data.reps || exercise.progression.startingReps)
-              };
-            } else if (data.reps > 0) {
-              exercise.progression = {
-                ...exercise.progression,
-                type: 'Add Reps',
-                amount: 1, // Default rep increment
-                startingWeight: data.startingWeight > 0 ? data.startingWeight : exercise.progression.startingWeight,
-                startingReps: data.startingReps > 0 ? data.startingReps : data.reps
-              };
-            }
+            exercise.progression = {
+              ...exercise.progression,
+              startingWeight: data.startingWeight > 0 ? data.startingWeight : exercise.progression.startingWeight,
+              startingReps: data.startingReps > 0 ? data.startingReps : (data.reps || exercise.progression.startingReps)
+            };
           }
         });
       });
@@ -320,8 +307,6 @@ export class PlannerComponent implements OnInit {
       // Clear the file input
       this.spreadsheetInput.nativeElement.value = '';
       
-      // Show success message
-      alert('Progression data updated successfully from spreadsheet!');
     } catch (error) {
       console.error('Error updating progression data:', error);
       alert('Error updating progression data. Please check the console for details.');
