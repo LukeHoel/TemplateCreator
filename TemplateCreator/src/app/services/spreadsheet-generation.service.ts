@@ -71,23 +71,38 @@ export class SpreadsheetGenerationService {
                   // Weight
                   if (isFirstRow) {
                     if (previousSheetName) {
-                      const prevSheetCell = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+                      // Find the last row with the same exercise color in the previous sheet
+                      let lastRowWithColor = 1;
+                      const prevSheet = wb.Sheets[previousSheetName];
+                      Object.keys(prevSheet)
+                        .filter(key => !key.startsWith('!'))
+                        .forEach(key => {
+                          const cell = XLSX.utils.decode_cell(key);
+                          if (cell.c === colIndex && cell.r > lastRowWithColor) {
+                            const cellStyle = prevSheet[key]?.s;
+                            if (cellStyle?.fill?.fgColor?.rgb === exercise.color.replace('#', '')) {
+                              lastRowWithColor = cell.r;
+                            }
+                          }
+                        });
+                      const lastRowCell = XLSX.utils.encode_cell({ r: lastRowWithColor, c: colIndex });
+                      
                       let formula;
                       switch(exercise.progression.type) {
                         case 'Add Weight':
                           const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
-                          formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell}${add})`;
+                          formula = `IF('${previousSheetName}'!${lastRowCell}="","",'${previousSheetName}'!${lastRowCell}${add})`;
                           break;
                         case 'Add Percentage':
                           // Increase previous reps by specified percentage
                           const percentageMultiplier = 1 + (exercise.progression.amount / 100);
-                          formula = `IF('${previousSheetName}'!${prevSheetCell}="","",ROUND('${previousSheetName}'!${prevSheetCell}*${percentageMultiplier},0))`;
+                          formula = `IF('${previousSheetName}'!${lastRowCell}="","",ROUND('${previousSheetName}'!${lastRowCell}*${percentageMultiplier},0))`;
                           break;
                         default:
-                          formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
+                          formula = `IF('${previousSheetName}'!${lastRowCell}="","",'${previousSheetName}'!${lastRowCell})`;
                           break;
                       }
-                      
+
                       ws[cellRef] = { t: 'n', f: formula };
                     } else if (exercise.progression.startingWeight > 0) {
                       // For first week, use starting weight if available
@@ -117,11 +132,32 @@ export class SpreadsheetGenerationService {
                         formula = `IF('${previousSheetName}'!${prevSheetRepsCell}="",IF('${previousSheetName}'!${prevSheetTargetRepsCell}="","",'${previousSheetName}'!${prevSheetTargetRepsCell}+${exercise.progression.amount}),'${previousSheetName}'!${prevSheetRepsCell}+${exercise.progression.amount})`;
                         break;
                       case 'Add Percentage':
+                        // Increase previous reps by specified percentage
+                        const percentageMultiplier = 1 + (exercise.progression.amount / 100);
+                        formula = `IF('${previousSheetName}'!${prevSheetRepsCell}="","",ROUND('${previousSheetName}'!${prevSheetRepsCell}*${percentageMultiplier},0))`;
+                        break;
                       case 'Add Weight':
+                        const add = exercise.progression.type === 'Add Weight' ? `+ ${exercise.progression.amount}` : ' ';
+                        formula = `IF('${previousSheetName}'!${prevSheetRepsCell}="","",'${previousSheetName}'!${prevSheetRepsCell}${add})`;
+                        break;
                       case 'None':
                       default:
-                        // Keep same reps
-                        formula = `IF('${previousSheetName}'!${prevSheetRepsCell}="",IF('${previousSheetName}'!${prevSheetTargetRepsCell}="","",'${previousSheetName}'!${prevSheetTargetRepsCell}),'${previousSheetName}'!${prevSheetRepsCell})`;
+                        // Find the last row with the same exercise color in the previous sheet
+                        let lastRowWithColor = 1;
+                        const prevSheet = wb.Sheets[previousSheetName];
+                        Object.keys(prevSheet)
+                          .filter(key => !key.startsWith('!'))
+                          .forEach(key => {
+                            const cell = XLSX.utils.decode_cell(key);
+                            if (cell.c === colIndex && cell.r > lastRowWithColor) {
+                              const cellStyle = prevSheet[key]?.s;
+                              if (cellStyle?.fill?.fgColor?.rgb === exercise.color.replace('#', '')) {
+                                lastRowWithColor = cell.r;
+                              }
+                            }
+                          });
+                        const prevSheetCell = XLSX.utils.encode_cell({ r: lastRowWithColor, c: colIndex });
+                        formula = `IF('${previousSheetName}'!${prevSheetCell}="","",'${previousSheetName}'!${prevSheetCell})`;
                         break;
                     }
 
